@@ -1,51 +1,24 @@
 
-import React, {Component} from 'react';
+import React from 'react';
 
-class Devices extends Component {
-
-    constructor(props) {
-        super(props)
-        
-      
-        this.state = { 
-            Name : props.Name,
-            Value : props.Value,
-            Unit : props.Unit ,
-            Timestamp : props.Timestamp,
-            ActiveStatus : props.ActiveStatus,
-            trueCount : 0,
-            falseCount : 0
-         }
-       
-      }
+const Devices = (props) => {
   
-  
-   
-    render() {
-        if(this.state.ActiveStatus== true)
-        {
-          var x= "true";
-        
-         
-        }
-        else 
-        {
-           var x= "false";
-           
-        }
-        return(
-        <div>
-           
-            <h4>Name : {this.state.Name}</h4>
-            <p>Unit : {this.state.Value}</p>
-            <p>Value : {this.state.Unit}</p>
-            <p>TimeStamp : {this.state.Timestamp}</p> 
-            <p>ActiveStatus : {x}</p>        
-        </div>
-        );
-    }
-   
-}
+    const {name, unit ,value , timestamp, active} = props.post;
+    
+              return (
+              <div>
+                  <p>Name : {name}</p>
+                  <p>Unit : {unit}</p>
+                  <p>Value : {value}</p>
+                  <p>Time Stamp : {timestamp}</p>
+                  <p>ActiveStatus : { active ? "ON" : "OFF"}</p>  
+                  <button onClick={props.click.bind(this, name, active)}>
+                    Change Active Status
+                </button>
+                  <hr></hr>
+              </div>     
+            );
+  }
 
 
 export default Devices;

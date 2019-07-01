@@ -1,6 +1,9 @@
 
 import React, {Component} from 'react';
 import axios from 'axios';
+import Device from './Devices';
+import SearchBar from './SearchBar';
+
 
 class App extends Component {
 
@@ -8,7 +11,7 @@ class App extends Component {
         super(props)
         this.state = { 
             posts: [],
-            device : [],
+            searchQuery : ""
               }
 
     this.changeActiveStatus = this.changeActiveStatus.bind(this);
@@ -19,129 +22,67 @@ class App extends Component {
     {
         axios.get('http://127.0.0.1:8888/device').
         then(response => {
-        this.setState({posts: response.data.data,
-                       device: response.data.data
-            
-        });
-       
+        this.setState({
+          posts: response.data.data,   
+        });  
         }
             ); 
     }
  // Method for changing Active Status of Machine
-   changeActiveStatus(index,name,toggle)
+  changeActiveStatus(name,toggle)
    {
-       let activeStatus = !toggle;
+     let activeStatus = !toggle;
+  
+    
     axios.patch(`http://127.0.0.1:8888/device/${name}?active=${activeStatus}`).
     then(response => {
         console.log('👉 Returned data:', response);
-        
-        const list = this.state.posts;
-        let count =0;
-        for(let item of list){
-            
-            if(count==index)
-            {
-                item.active=!item.active;
-            }
-            count++;
-         
+        const updatedPosts = this.state.posts;
+        updatedPosts.forEach(function(post)
+        {
+          if(post.name == name)
+          {
+            post.active = !(post.active);
           }
-          console.log(list);
-        this.setState((state, props) => ({
-            posts: list ,
-            device : list
-          }));
+        }
+        );
+
+        this.setState({
+             posts : updatedPosts
+        });
+       
    
     }
         ); 
+
+      
    }
  // Method for searching devices on base of their name
-   searchHandler(event){
-    let objList = this.state.posts;
-    let List = "";
-      if(event.target.value == "")
-      {
-         objList = this.state.posts;
-      }
-      
-      else {
-         List = objList.find(function (obj) { return obj.name == event.target.value});
-         
-       if(List != "" && List!= undefined )
-       {
-        objList= [
-            {
-              
-              name: List.name,
-              unit: List.unit,
-              value: List.unit,
-              timestamp: List.timestamp,
-              active: List.active
-            }
-        ]
-        
-        
-       }
-       if(List == "" || List == undefined ) {
-        objList = this.state.posts;
-       }
-          
-       this.setState({device: objList
-          
-       });
-        
-      }
+  searchHandler(event){
+    let query = event.target.value;
+    console.log(event.target.value);
+    this.setState({searchQuery: query});
+   
     
        
    }
    
     render() {
-        let count1=0;
-        let count2=0;
-        for(let item of this.state.posts){
-            if(item.active==true)
-            {
-               count1 =count1 +1;
-            }
-           else{
-               count2 = count2+1;
-           }
-          }
       
-       const posts = this.state.device.map((post,index) => {
-        if(post.active== true)
-        {
-          var x= "ON";
-         
-        }
-        else 
-        {
-           var x= "OFF"; 
-        }
-            return (
-            <div>
-                <h4>Name : {post.name}</h4>
-                <p>Unit : {post.unit}</p>
-                <p>Value : {post.value}</p>
-                <p>TimeStamp : {post.timestamp}</p> 
-                <button onClick={this.changeActiveStatus.bind(this, index, post.name, post.active)}>
-                    Change Active Status
-                </button>
-                <p>ActiveStatus : {x}</p>  
-                <hr></hr>
-            </div>     
-            );
-           
-        });
-      
-  
+       const {posts,searchQuery} = this.state; 
+
         return(
             <div>
-               Search Device :   <input type="text" onChange={this.searchHandler}  /> 
-                <h3>Active Devices : {count1}</h3>
-                <h3>InActive Devices : {count2}</h3>
-              <hr></hr>
-             {posts}
+             <SearchBar  change ={this.searchHandler} ></SearchBar>
+             {
+               posts.filter(
+                 function(post)
+                 {
+                  return post.name.includes(searchQuery)
+                 }
+               ).map(post => <Device  post= {{...post}} click = {this.changeActiveStatus}/> )
+             }
+            
             </div>
         );
     }
